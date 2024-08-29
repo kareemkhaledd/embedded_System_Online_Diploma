@@ -127,6 +127,9 @@ int OS_SVC_SET(int a, int b, int SVC_ID)
 	case 3://MUL
 		__asm("svc #0x03");
 		break;
+	case 4:
+		__asm("svc #0x04");
+		break;
 	}
 
 	__asm("mov %0,r0 " :"=r" (result));
@@ -151,6 +154,9 @@ void OS_SVC_services(int* StackFramePointer)
 	case 3://MUL
 		StackFramePointer[0] = val1*val2;
 		break;
+	case 4:
+		SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk ;
+		break;
 	}
 
 }
@@ -161,6 +167,10 @@ __attribute ((naked)) void SVC_Handler()
 			"mrseq r0,MSP \n\t"
 			"mrsne r0,PSP \n\t"
 			"B OS_SVC_services ");
+}
+void PendSV_Handler()
+{
+
 }
 int main(void)
 {
@@ -181,6 +191,7 @@ int main(void)
 	IRQ_Flag = OS_SVC_SET(3,3,1);
 	IRQ_Flag = OS_SVC_SET(3,3,2);
 	IRQ_Flag = OS_SVC_SET(3,3,3);
+	IRQ_Flag = OS_SVC_SET(3,3,4);
 	while (1)
 	{
 		if(IRQ_Flag)
